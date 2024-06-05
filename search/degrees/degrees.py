@@ -51,6 +51,21 @@ def load_data(directory):
             except KeyError:
                 pass
 
+def display(names , movies , people) -> None:
+    print(" ===================================" )
+    print("actor"+" "*10, "actor id" + " "*10)
+    for k,v in names.items():
+        print(f"{k:15}  {str(v):10}")
+
+    print(" ===================================" )
+    print("movie"+" "*10, "movie info" + " "*10)
+    for k,v in movies.items():
+        print(f"{k:10}  {str(v):10}")
+
+    print(" ===================================" )
+    print("actor id"+" "*10, "profile" + " "*10)
+    for k,v in people.items():
+        print(f"{k:10}  {str(v):10}")
 
 def main():
     if len(sys.argv) > 2:
@@ -61,14 +76,15 @@ def main():
     print("Loading data...")
     load_data(directory)
     print("Data loaded.")
-    exit()
+    display(names, movies , people)
+
     source = person_id_for_name(input("Name: "))
     if source is None:
         sys.exit("Person not found.")
     target = person_id_for_name(input("Name: "))
     if target is None:
         sys.exit("Person not found.")
-
+    
     path = shortest_path(source, target)
 
     if path is None:
@@ -84,6 +100,41 @@ def main():
             print(f"{i + 1}: {person1} and {person2} starred in {movie}")
 
 
+
+def bfs(st:int , dest:int) -> list:
+    if st == dest:
+        return []
+    import copy
+    queue = QueueFrontier()
+    neighbours = neighbors_for_person(st)
+    # init
+    mark = set()
+    for item in neighbours:
+        queue.add([item])
+        mark.add(item[1])
+    
+    while not queue.empty():
+        # get head
+        node_list = queue.remove()
+        movie_id , actor_id = node_list[-1]
+        if actor_id == dest:
+            return node_list
+        # get related actor
+        neighbours = neighbors_for_person(actor_id)
+        for item in neighbours:
+            if item[1] in mark:
+                continue
+            else:
+                mark.add(item[1])
+            new_list = copy.deepcopy(node_list)
+            new_list.append(item)
+            queue.add(new_list)
+
+    return None
+
+            
+
+
 def shortest_path(source, target):
     """
     Returns the shortest list of (movie_id, person_id) pairs
@@ -91,7 +142,7 @@ def shortest_path(source, target):
 
     If no possible path, returns None.
     """
-
+    return bfs(source ,target)
     # TODO
     raise NotImplementedError
 
@@ -133,6 +184,7 @@ def neighbors_for_person(person_id):
         for person_id in movies[movie_id]["stars"]:
             neighbors.add((movie_id, person_id))
     return neighbors
+
 
 
 if __name__ == "__main__":
