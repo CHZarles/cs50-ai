@@ -1,5 +1,6 @@
 import itertools
 import random
+import copy
 
 
 class Minesweeper():
@@ -95,6 +96,17 @@ class Sentence():
         self.cells = set(cells)
         self.count = count
 
+        # code:
+        self.safe_cell = set()
+        self.mine_cell = set()
+        if self.count == 0:
+            self.safe_cell =  copy.deepcopy(self.cells);
+            self.cells.clear()
+        elif self.count == len(cells):
+            self.mine_cell = copy.deepcopy(self.cells);
+            self.cells.clear()
+        
+
     def __eq__(self, other):
         return self.cells == other.cells and self.count == other.count
 
@@ -105,12 +117,14 @@ class Sentence():
         """
         Returns the set of all cells in self.cells known to be mines.
         """
+        return self.mine_cell
         raise NotImplementedError
 
     def known_safes(self):
         """
         Returns the set of all cells in self.cells known to be safe.
         """
+        return self.safe_cell
         raise NotImplementedError
 
     def mark_mine(self, cell):
@@ -118,6 +132,20 @@ class Sentence():
         Updates internal knowledge representation given the fact that
         a cell is known to be a mine.
         """
+
+        if not self.cells:
+            return 
+
+        if cell in self.cells:
+            self.mine_cell.add(cell)
+            self.cells.remove(cell)
+            self.count -= 1
+
+        if self.count == 0: # remain cells are safe 
+            self.safe_cell.update(self.cells)
+            self.cells.clear()
+
+        return 
         raise NotImplementedError
 
     def mark_safe(self, cell):
@@ -125,6 +153,24 @@ class Sentence():
         Updates internal knowledge representation given the fact that
         a cell is known to be safe.
         """
+
+        if not self.cells:
+            return 
+
+        if cell in self.cells:
+            self.cells.remove(cell)
+            self.safe_cell.add(cell)
+            print("undefine cell 's num: " , len(self.cells) , self.cells)
+
+        if self.count == len(self.cells):
+            print("---------------------------------------------*******get one***********************-------------------------------")
+            self.count = 0
+            self.mine_cell.update(self.cells)
+            print("self.mine_cell , " , self.mine_cell)
+            self.cells.clear()
+            print("self.mine_cell , " , self.mine_cell)
+
+        return 
         raise NotImplementedError
 
 
@@ -149,6 +195,13 @@ class MinesweeperAI():
         # List of sentences about the game known to be true
         self.knowledge = []
 
+
+        # helper one 
+        self.all_cells = set()
+        for i in range(0 , height):
+            for j in range(0 , width):
+                self.all_cells.add((i , j))
+
     def mark_mine(self, cell):
         """
         Marks a cell as a mine, and updates all knowledge
@@ -167,6 +220,22 @@ class MinesweeperAI():
         for sentence in self.knowledge:
             sentence.mark_safe(cell)
 
+    # helper function
+    def get_neighbour_cells(self, cell) -> list:
+        res = []
+        for i in range(cell[0] - 1, cell[0] + 2):
+            for j in range(cell[1] - 1, cell[1] + 2):
+
+                # Ignore the cell itself
+                if (i, j) == cell:
+                    continue
+
+                # Update count if cell in bounds and is mine
+                if 0 <= i < self.height and 0 <= j < self.width:
+                   res.append((i , j))
+        return res
+
+                        
     def add_knowledge(self, cell, count):
         """
         Called when the Minesweeper board tells us, for a given
@@ -182,6 +251,81 @@ class MinesweeperAI():
             5) add any new sentences to the AI's knowledge base
                if they can be inferred from existing knowledge
         """
+        print("=======================================================")        
+        print("call add_knowledge: " , cell , count)
+        # 1)
+        self.moves_made.add(cell)
+        # 2)
+        self.safes.add(cell) # optimize it later
+         # 3)
+        neighbour_cells = self.get_neighbour_cells(cell)
+        self.knowledge.append(Sentence(neighbour_cells , count))
+        # 4)
+        safe_cell_queue = list(self.safes)
+        new_know_safe_cell = copy.deepcopy(self.safes)
+        mine_cell_queue = list(self.mines)
+        new_know_mine_cell = copy.deepcopy(self.mines)
+        while safe_cell_queue or mine_cell_queue:
+            while safe_cell_queue:
+                safe_one = safe_cell_queue.pop()
+                for sentence in self.knowledge:
+                    sentence.mark_safe(safe_one)
+                    cur_known_safes = sentence.known_safes() 
+                    # print("cur know safes: " , cur_known_safes)
+                    cur_new_known_safes = cur_known_safes.difference(self.safes)
+                    # print("cur_new_known_safes: " , cur_new_known_safes)
+                    # feat 
+                    cur_known_mines = sentence.known_mines() 
+                    cur_new_known_mines = cur_known_mines.difference(self.mines)
+                    # add to queue
+                    # self.mines.update(cur_known_mines)
+                    for item in cur_new_known_mines:
+                        if item in new_know_mine_cell:
+                            continue
+                        else:
+                            mine_cell_queue.append(item)
+                            cur_new_known_mines.add(item)
+
+                    for cell in cur_new_known_safes:
+                        if cell in new_know_safe_cell:
+                            continue
+                        else:
+                            new_know_safe_cell.add(cell)
+                            safe_cell_queue.append(cell)
+                            self.safes.add(cell)
+
+            while mine_cell_queue:
+                mine_one = mine_cell_queue.pop()
+                for sentence in self.knowledge:
+                    sentence.mark_mine(mine_one)
+                    cur_known_mines = sentence.known_mines() 
+                    # print("cur know safes: " , cur_known_safes)
+                    cur_new_known_mines = cur_known_mines.difference(self.mines)
+                    # print("cur_new_known_safes: " , cur_new_known_safes)
+                    # feat 
+                    cur_known_safes = sentence.known_safes() 
+                    cur_new_known_safes = cur_known_safes.difference(self.safes)
+                    #self.safes.update(cur_known_safes)
+                    for item in cur_new_known_safes:
+                        if item in new_know_safe_cell:
+                            continue
+                        else:
+                            safe_cell_queue.append(item)
+                            new_know_safe_cell.add(item)
+
+                    for cell in cur_new_known_mines:
+                        if cell in new_know_mine_cell:
+                            continue
+                        else:
+                            new_know_mine_cell.add(cell)
+                            mine_cell_queue.append(cell)
+                            self.mines.add(cell)
+
+        
+        print("after this round , self.safes: " , self.safes ) 
+        print("after this round , self.mines: " , self.mines ) 
+        return 
+
         raise NotImplementedError
 
     def make_safe_move(self):
@@ -193,6 +337,12 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
+
+        candidate_cells = self.safes.difference(self.moves_made)
+        print(self.safes)
+        if not candidate_cells:
+            return None
+        return list(candidate_cells)[0]
         raise NotImplementedError
 
     def make_random_move(self):
@@ -202,4 +352,11 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
+        
+        candidate_cells = self.all_cells.difference(self.mines)
+        candidate_cells = candidate_cells.difference(self.moves_made)
+        if candidate_cells:
+            return list(candidate_cells)[0] 
+        else:
+            return None
         raise NotImplementedError
