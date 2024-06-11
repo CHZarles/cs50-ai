@@ -92,121 +92,86 @@ class Sentence():
     and a count of the number of those cells which are mines.
     """
 
-    _new_know_safe_cells = set()
-    _new_know_mine_cells = set()
     def __init__(self, cells, count):
-        # unknow state -> empty
         self.cells = set(cells)
         self.count = count
 
         # code:
         self.safe_cell = set()
         self.mine_cell = set()
-        if self.count == 0: # all safe
+        if self.count == 0:
             self.safe_cell =  copy.deepcopy(self.cells);
-            Sentence._new_know_safe_cells.update(self.safe_cell)
-            self.cells.clear() 
-
-        elif self.count == len(cells): # all mine
-            self.count = 0
-            self.mine_cell = copy.deepcopy(self.cells);
-            Sentence.update_new_know_mine_cell(self.mine_cell)
             self.cells.clear()
-
-    @staticmethod 
-    def get_new_know_safe_cell(): 
-        item = copy.deepcopy(Sentence._new_know_safe_cells)
-        Sentence._new_know_safe_cells.clear()
-        return item
-            
-    @staticmethod 
-    def get_new_know_mine_cell(): 
-        item = copy.deepcopy(Sentence._new_know_mine_cells)
-        Sentence._new_know_mine_cells.clear()
-        return item
-
-    @staticmethod
-    def exist_new_know_mine_cell():
-        return len(Sentence._new_know_mine_cells) > 0
-
-    @staticmethod
-    def exist_new_know_safe_cell():
-        return len(Sentence._new_know_safe_cells) > 0
-
-    @staticmethod 
-    def update_new_know_safe_cell(input):
-        Sentence._new_know_safe_cells.update(input)
-
-    @staticmethod 
-    def update_new_know_mine_cell(input):
-        print("==== update new know mine cell ====" , Sentence._new_know_mine_cells)
-        Sentence._new_know_mine_cells.update(input)
-
-    def still_unknow(self):
-        return len(self.cells) > 0
-    
-    def get_state(self):
-        return copy.deepcopy(self.cells) , self.count
+        elif self.count == len(cells):
+            self.mine_cell = copy.deepcopy(self.cells);
+            self.cells.clear()
+        
 
     def __eq__(self, other):
         return self.cells == other.cells and self.count == other.count
 
     def __str__(self):
         return f"{self.cells} = {self.count}"
-    
+
     def known_mines(self):
         """
         Returns the set of all cells in self.cells known to be mines.
         """
-        return copy.deepcopy(self.mine_cell)
+        return self.mine_cell
+        raise NotImplementedError
 
     def known_safes(self):
         """
         Returns the set of all cells in self.cells known to be safe.
         """
-        return copy.deepcopy(self.safe_cell)
+        return self.safe_cell
+        raise NotImplementedError
 
     def mark_mine(self, cell):
         """
         Updates internal knowledge representation given the fact that
         a cell is known to be a mine.
         """
+
         if not self.cells:
             return 
 
         if cell in self.cells:
             self.mine_cell.add(cell)
-            Sentence.update_new_know_mine_cell({cell,})
             self.cells.remove(cell)
             self.count -= 1
 
         if self.count == 0: # remain cells are safe 
             self.safe_cell.update(self.cells)
-            Sentence._new_know_safe_cells.update(self.safe_cell)
             self.cells.clear()
 
         return 
+        raise NotImplementedError
 
     def mark_safe(self, cell):
         """
         Updates internal knowledge representation given the fact that
         a cell is known to be safe.
         """
+
         if not self.cells:
             return 
 
         if cell in self.cells:
             self.cells.remove(cell)
             self.safe_cell.add(cell)
-            Sentence._new_know_safe_cells.add(cell)
+            print("undefine cell 's num: " , len(self.cells) , self.cells)
 
-        if self.count == len(self.cells): # remain cells are mine
-            self.mine_cell.update(self.cells)
-            Sentence.update_new_know_mine_cell(self.cells)
+        if self.count == len(self.cells):
+            print("---------------------------------------------*******get one***********************-------------------------------")
             self.count = 0
+            self.mine_cell.update(self.cells)
+            print("self.mine_cell , " , self.mine_cell)
             self.cells.clear()
+            print("self.mine_cell , " , self.mine_cell)
 
         return 
+        raise NotImplementedError
 
 
 class MinesweeperAI():
@@ -264,6 +229,7 @@ class MinesweeperAI():
                 # Ignore the cell itself
                 if (i, j) == cell:
                     continue
+
                 # Update count if cell in bounds and is mine
                 if 0 <= i < self.height and 0 <= j < self.width:
                    res.append((i , j))
@@ -290,84 +256,13 @@ class MinesweeperAI():
         # 1)
         self.moves_made.add(cell)
         # 2)
-        self.mark_safe(cell)
+        self.safes.add(cell) # optimize it later
          # 3)
         neighbour_cells = self.get_neighbour_cells(cell)
-        new_sentence = Sentence(neighbour_cells , count)
-        self.knowledge.append(new_sentence)
+        self.knowledge.append(Sentence(neighbour_cells , count))
         # 4)
-        # 用已知信息推理new sentence          
-        for cell in self.safes:
-            new_sentence.mark_safe(cell)
-        for cell in self.mines:
-            new_sentence.mark_mine(cell)
-
-        # bfs  遍历 sentence ，看看有没有新推导的 safe cell
-        while True:
-            exist_new_info = False
-            while Sentence.exist_new_know_safe_cell() or Sentence.exist_new_know_mine_cell():
-                new_know_safe_cell = Sentence.get_new_know_safe_cell()
-                new_know_safe_cell = new_know_safe_cell.difference(self.safes)
-                if new_know_safe_cell:
-                    exist_new_info = True
-                print("new know safe cell: " , new_know_safe_cell)
-                for cell in new_know_safe_cell:
-                    self.mark_safe(cell)
-
-                #while Sentence.exist_new_know_mine_cell():
-                new_know_mine_cell = Sentence.get_new_know_mine_cell()
-                new_know_mine_cell = new_know_mine_cell.difference(self.mines)
-                if new_know_mine_cell:
-                    exist_new_info = True
-                print("new know mine cell: " , new_know_mine_cell)
-                for cell in new_know_mine_cell:
-                    self.mark_mine(cell)
-            
-                
-
-            exist_new_sentence = False
-            while True: 
-                num = len(self.knowledge)
-                new_sentence_list = []
-                for i in range(num):
-                    if not self.knowledge[i].still_unknow():
-                        continue 
-                    for j in range(i + 1, num):
-                       if not self.knowledge[j].still_unknow():
-                            continue 
-                       cells0 ,count0  = self.knowledge[i].get_state()
-                       cells1 ,count1  = self.knowledge[j].get_state()
-                       
-                       if cells0.issubset(cells1):
-                           new_sentence_list.append(Sentence(list(cells1.difference(cells0)) , count1 - count0))
-                           if new_sentence in self.knowledge:
-                               continue
-                           exist_new_sentence = True
-
-                       if cells1.issubset(cells0):
-                           new_sentence_list.append(Sentence(list(cells1.difference(cells0)) , count0 - count1))
-                           if new_sentence in self.knowledge:
-                               continue
-                           exist_new_sentence = True
-
-                for item in new_sentence_list:
-                    self.knowledge.append(item)
-
-                if not exist_new_sentence :
-                    break
-
-            if not exist_new_info and not exist_new_sentence:
-                break
-
-
-        print(" ============= unknow sentence ============") 
-        for item in self.knowledge:
-            if item.still_unknow():
-                print(item)
-        print("after this round , self.safes: " , self.safes ) 
-        print("after this round , self.mines: " , self.mines ) 
-        return 
-
+        safe_cell_queue = list(self.safes)
+        new_know_safe_cell = copy.deepcopy(self.safes)
         mine_cell_queue = list(self.mines)
         new_know_mine_cell = copy.deepcopy(self.mines)
         while safe_cell_queue or mine_cell_queue:
@@ -392,10 +287,10 @@ class MinesweeperAI():
                             cur_new_known_mines.add(item)
 
                     for cell in cur_new_known_safes:
-                        if cell in safe_cell_marker:
+                        if cell in new_know_safe_cell:
                             continue
                         else:
-                            safe_cell_marker.add(cell)
+                            new_know_safe_cell.add(cell)
                             safe_cell_queue.append(cell)
                             self.safes.add(cell)
 
@@ -460,7 +355,6 @@ class MinesweeperAI():
         
         candidate_cells = self.all_cells.difference(self.mines)
         candidate_cells = candidate_cells.difference(self.moves_made)
-        # TOOD:make it really random 
         if candidate_cells:
             return list(candidate_cells)[0] 
         else:
