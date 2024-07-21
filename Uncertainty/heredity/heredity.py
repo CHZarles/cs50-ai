@@ -134,6 +134,20 @@ def powerset(s):
 
 # a helper function
 def calc_gene_pass_probability(father: int, mother: int, child: int) -> float:
+    """
+    Calculate the probability of a child inheriting a certain number of genes from their parents.
+
+    Parameters:
+    father (int): The number of genes the father has.
+    mother (int): The number of genes the mother has.
+    child (int): The number of genes the child has.
+
+    Returns:
+    float: The probability of the child inheriting the specified number of genes from their parents.
+
+    """
+    # pass_gene_prob[k] = v
+    # means if one person have k gene, the probability of pass gene to child is v
     pass_gene_prob = {
         0: PROBS["mutation"],
         1: 0.5 * (1 - PROBS["mutation"]) + 0.5 * PROBS["mutation"],
