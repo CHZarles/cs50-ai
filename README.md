@@ -72,3 +72,6 @@ reference
     - Probabilistic reasoning over time
       - (hidden) Markov model , Markov chains
       - sensor model , transition model
+
+- complementary reference
+  - https://ktiml.mff.cuni.cz/~bartak/ui2/lectures/
