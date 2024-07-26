@@ -75,3 +75,68 @@ reference
 
 - complementary reference
   - https://ktiml.mff.cuni.cz/~bartak/ui2/lectures/
+
+# optimization
+
+- source url
+
+  - https://cs50.harvard.edu/ai/2024/projects/3/crossword/
+
+- Core conception
+  - Local search
+    - Hill climbing
+      - Simulated Annealing
+  - Linear Programming
+  - Constraint Satisfaction
+    - terms of constraint
+      - unary constraint
+        - Node Consistency
+      - binary constraint
+        - Arc Consistency
+      - Hard / soft constraint
+    - revise algorithm
+    - arc3 algorithm
+    - backtrack search algorithm
+
+# Machine learning
+
+- Core conception
+  - Supervised learning
+    - learn a function to map input to output
+    - relative task
+      - classification
+        - nearest-neighbour classification
+        - k-nearest-neighbour classification
+        - perceptron learning rule
+          - define , weight vector / input vector
+            - W dot product X -> Output
+          - update a formulation
+            - update each weight given data point, (x , y)
+              - ie. wi = wi + α(actual_value - estimate) \* xi
+                - α is learning rate , a number which we choose
+          - end up with a threshold function
+        - Support Vector Machines
+          - effect: maximum margin separator
+            - boundary that maximizes the distance between any of the data points
+            - can represent decision boundaries with more than two dimensions
+      - regression
+        - learning a function mapping an input point to a continuous value
+    - Evaluating Hypotheses
+      - loss function : expresses how poorly our hypothesis performs
+        - 0-1 loss function
+        - L1 loss function
+        - L2 loss function
+      - overfitting : a model that fits too closely to particular data set
+        - define cost function, cost(h) = loss(h) + complexity(h)
+        - avoid overfitting:
+          - regularization : penalizing hypothesis that are more complex to favor simpler, more general Hypotheses
+          - holdout cross-validation
+            - splitting data into a training set and test set
+  - Reinforcement learning
+    - define: given a set of rewards or punishments, learn what actions to take the future.
+    - Markov Decision Process
+      - Set of states S
+      - Set of actions Actions(s)
+      - Transition model P(s'|s,a)
+      - Reward function R(s, a,'s)
+    - Q-learning

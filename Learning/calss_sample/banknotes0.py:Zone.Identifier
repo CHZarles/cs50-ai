@@ -1,0 +1,4 @@
+[ZoneTransfer]
+ZoneId=3
+ReferrerUrl=https://cdn.cs50.net/
+HostUrl=https://s3.amazonaws.com/cdn.cs50.net/ai/2020/spring/lectures/4/src4/banknotes/banknotes0.py?response-content-disposition=attachment&response-content-type=application%2Foctet-stream&AWSAccessKeyId=AKIAJWDAOEC2ETXV2L6A&Signature=7WdcI4H91uZ3EGZXKYSXJJqOnpo%3D&Expires=1722064556
