@@ -107,7 +107,7 @@ class CrosswordCreator:
         # iterate each variable in crossword.variables
         # check their domain, if the length of the word is not equal to the length of the variable, remove it
         for var in self.crossword.variables:
-            for word in self.domains[var]:
+            for word in self.domains[var].copy():
                 # for word in self.domains[var].copy():
                 if len(word) != var.length:
                     self.domains[var].remove(word)
@@ -163,6 +163,7 @@ class CrosswordCreator:
                     if x != y:
                         queue.append((x, y))
         else:
+            # convert the assignment to a list
             queue = arcs.copy()
 
         while queue:
@@ -199,6 +200,12 @@ class CrosswordCreator:
         """
 
         for var in assignment.keys():
+            # check unary constraints
+            # check whether the length of the word is equal to the length of the variable
+            if len(assignment[var]) != var.length:
+                return False
+            
+            # check the binary constraints
             # fine the neighbors of var
             for neighbor in self.crossword.neighbors(var):
                 # get the overlap of var and neighbor
@@ -267,8 +274,40 @@ class CrosswordCreator:
 
         If no assignment is possible, return None.
         """
-        raise NotImplementedError
+        
+        # search success
+        if self.assignment_complete(assignment):
+            return assignment
+        
+        # get a var that not be assignmented
+        var = self.select_unassigned_variable(assignment)
 
+        # emumerate the words in var's domain
+        for word in self.order_domain_values(var, assignment):
+            assignment[var] = word
+            # find var 's neighbors that not be assignmented
+            # and add the arc to the queue
+            arc_queue = []
+            for neighbor in self.crossword.neighbors(var):
+                if neighbor not in assignment.keys():
+                    arc_queue.append((neighbor, var))
+            # enforced arc3 
+            backup_domains = self.domains.copy()
+            if not self.ac3(arc_queue):
+                return False 
+
+            # inference 
+            if self.consistent(assignment):
+                result = self.backtrack(assignment)
+                if result is not None:
+                    return result
+            # back track
+            assignment.pop(var)
+            self.dmains = backup_domains
+ 
+
+
+        return None
 
 def main():
 
