@@ -100,6 +100,10 @@ reference
 
 # Machine learning
 
+- source url
+
+  - https://cs50.harvard.edu/ai/2024/projects/4/shopping/
+
 - Core conception
   - Supervised learning
     - learn a function to map input to output
@@ -140,3 +144,11 @@ reference
       - Transition model P(s'|s,a)
       - Reward function R(s, a,'s)
     - Q-learning
+      - Greedy Decision-Making
+      - Explore vs. Exploit
+        - ε-Greedy
+  - Unsupervised learning
+    - given input data without any addtonal feedback , learn patterns
+    - relative task
+      - Clustering
+        - k-means clustering
