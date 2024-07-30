@@ -102,7 +102,8 @@ reference
 
 - source url
 
-  - https://cs50.harvard.edu/ai/2024/projects/4/shopping/
+  - https://cs50.harvard.edu/ai/2024/projects/4/shopping/ ( about k-nearest-neighbour )
+  - https://cs50.harvard.edu/ai/2024/projects/4/nim/ (about Q-learning)
 
 - Core conception
   - Supervised learning
@@ -152,3 +153,33 @@ reference
     - relative task
       - Clustering
         - k-means clustering
+
+# Neural Networks
+
+- source url
+
+  - https://cs50.harvard.edu/ai/2024/projects/5/traffic/
+    - 这个project 比较简单，更多的只是让你体会怎么用tensorflow 来构建一个 CNN 分类网络
+
+- Core conception
+
+  - Artificial Neural Networks
+    - Model mathematical function from inputs to outputs based on the structure and parameters of the network
+    - Allows for learning the network's based on data
+    - ie. h(x1, x2) = w0 + w1.x1 + w2.x2
+    - activation function
+      -if g is a activation function , then h(x1, x2) = g(w0 + w1.x1 + w2.x2) [ it is a network that have two inputs , one output ]
+  - Gradient descent
+    - updates weight, minimize the amount of loss
+  - Mini-Batch Grandient descent
+  - Perceptron
+    - Only capable of learning linearly separable decision boundary
+  - Multilayer neural network
+    - back-propagation ( algorithm for train Multilayer network )
+    - dropput ( temporay remove some units prevent overfitting )
+  - Image convolution
+    - max-pooling
+    - artificial intelligence framework
+  - recurrent neural network
+
+- Quiz (./neural_networks/quiz_5.md)
