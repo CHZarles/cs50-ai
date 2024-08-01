@@ -14,10 +14,10 @@ What value will this network compute for y given inputs x1 = 3, x2 = 2, and x3 =
 > The neural network be like
 
 ```
- 1 -> Node(w0)--|
-x1 -> Node(w1)  |
-x2 -> Node(w2)  |--> Node(g) -> y
-x3 -> Node(w3)__|
+ 1 -> Node--w0--|
+x1 -> Node--w1--|
+x2 -> Node--w2--|--> Node--g-> y
+x3 -> Node--w3--|
 
 g is a activation function
 

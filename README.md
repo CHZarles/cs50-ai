@@ -183,3 +183,33 @@ reference
   - recurrent neural network
 
 - Quiz (./neural_networks/quiz_5.md)
+
+# Language
+
+- source url
+
+  - https://cs50.harvard.edu/ai/2024/projects/6/parser/ (最后一个case没有过，先不管了。。。)
+  - https://cs50.harvard.edu/ai/2024/projects/6/attention/
+
+- Core conception
+  - language general
+    - Syntax of language
+  - sentiment
+    - bag-word-model
+      - Markov chain, BayesBaseClassfier
+      - smoothing
+    - word representation
+      - convert: a word -> a vector
+      - a word -> distribution representation of vector
+    - word2vec model
+      - learn corpus, word -> a sequence of probability distribution
+      - calc distance(words["book"], words["food"])
+    - liken Translation problem
+      - Input is not fixed -> use RNN (outmoded)
+      - Translate a sequence tp another sequence
+        - input -> encoder -> decoder -> output
+    - Attention
+      - give words attention scores
+    - Transformers
+      - input parallelize
+      - self-Attention
